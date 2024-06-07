@@ -1,6 +1,8 @@
-<nav>
-    <ul>
-        <li><a href="">liste des articles</a></li>
-        <li><a href="">créer des articles</a></li>
-    </ul>
-</nav>
+<article>
+    <h2>{{article.title}}</h2>
+    <h3>{{article.categorie}}</h3>
+
+    {{article.content}}
+
+    <p>Article publié le {{article.publishedAt}}</p>
+</article>

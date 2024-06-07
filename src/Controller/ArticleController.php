@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Article;
 use App\Form\ArticleType;
 use Doctrine\ORM\EntityManagerInterface;
+use App\Repository\ArticleRepository;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -15,17 +16,30 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 #[Route('/articles', name:'articles_')]
 class ArticleController extends AbstractController
 {
+    #[Route('/show/{id}', name: 'show')]
+    public function show(Article $article = null){
+        return $this->render('article/show.html.twig',[
+            'article' => $article
+        ]);
+    }
+
     #[Route('/', name: 'list')]
-    public function list(): Response
+    public function list(ArticleRepository $articleRepository): Response
     {
-        return $this->render('article/list.html.twig');
+        return $this->render('article/list.html.twig',[
+            'articles'=> $articleRepository->findAll(),
+        ]);
     }
 
     #[Route('/edit/{id}', name: 'edit')]
     #[Route('/create', name: 'create')]
-    public function edit(Request $request, EntityManagerInterface $em): Response
+    public function edit(Request $request, EntityManagerInterface $em, ?Article $article = null): Response
     {
-        $article = new Article();
+        $isCreate = false;
+        if(!$article){
+            $isCreate = true;
+            $article = new Article();
+        }
 
         $form = $this->createForm(ArticleType::class, $article);
         
@@ -41,7 +55,7 @@ class ArticleController extends AbstractController
             $em->persist($article);
             $em->flush();
             
-
+            $this->addFlash('success',$isCreate ? 'l\'article à bien été crée':'l\'article à été modifié');
             // ... perform some action, such as saving the task to the database
 
             return $this->redirectToRoute('articles_list');
@@ -53,8 +67,11 @@ class ArticleController extends AbstractController
         ]);
     }
     #[Route('/delete/{id}', name: 'delete')]
-    public function delete(): RedirectResponse
+    public function delete(EntityManagerInterface $em, Article $article): RedirectResponse
     {
+        $em->remove($article);
+        $em->flush();
+        
         $this->addFlash(type:'success',message:'L\'article a été supprimé');
         
         return $this->redirectToRoute('articles_list');
