@@ -13,6 +13,19 @@
             <p>{{article.status}}
         {% endif %}
     </article>
+    <div>
+
+        {% for comment in article.comments %}
+            <p>{{comment.comment}}</p>
+        {% else %}
+
+            <p>aucun commentaire</p>
+        {% endfor %}
+
+
+    
+        {{form(form)}}
+    </div>
 
 
 

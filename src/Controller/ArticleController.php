@@ -3,7 +3,12 @@
 namespace App\Controller;
 
 use App\Entity\Article;
+use App\Entity\ArticleNote;
+use App\Entity\Comment;
+use App\Entity\User;
 use App\Form\ArticleType;
+use Symfony\Component\Routing\RouterInterface;
+use App\Form\CommentType;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Repository\ArticleRepository;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
@@ -17,8 +22,19 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 class ArticleController extends AbstractController
 {
     #[Route('/show/{id}', name: 'show')]
-    public function show(Article $article = null){
+    public function show(RouterInterface $router,Article $article = null){
+        
+        $comment = new Comment;
+        $comment -> setArticle($article);
+
+
+        $form = $this->createForm(CommentType::class, $comment, [
+            'action'=> $router->generate('comments_create',['article'=>$article->getId()])
+        ]);
+
         return $this->render('article/show.html.twig',[
+
+            'form'=> $form,
             'article' => $article
         ]);
     }
