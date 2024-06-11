@@ -1,14 +1,11 @@
-{% extends "base.html.twig" %}
+{% extends 'base.html.twig' %}
+
+{% form_theme form with [
+    'form/template.html.twig'
+] %}
 
 {% block body %}
-    <h2>Ajouter un article </h2>
+    <h2>modifier</h2>
 
-    {{form_start(form)}}
-
-    {{form_row(form.title)}}
-    {{form_row(form.content)}}
-    
-
-    {{form_end(form)}}
-
+    {{ form(form) }}
 {% endblock %}
