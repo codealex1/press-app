@@ -40,7 +40,7 @@ class CommentController extends AbstractController
             /** @var Comment $comment */
             $comment = $form->getData();
             $comment->setPublishedAt(new \DateTimeImmutable());
-            
+            $comment->setUser($this->getUser());
 
             $em->persist($comment);
             $em->flush();

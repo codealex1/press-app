@@ -1,0 +1,11 @@
+<turbo-frame id="comment" >
+  {% form_theme form with [
+      'form/template.html.twig'
+  ] %}
+
+  {% block body %}
+      <h2> Ajouter un commentaire</h2>
+
+      {{ form(form) }}
+  {% endblock %}
+</turbo-frame>
