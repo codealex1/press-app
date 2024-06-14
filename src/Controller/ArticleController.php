@@ -2,26 +2,29 @@
 
 namespace App\Controller;
 
-use App\Entity\Article;
-use App\Entity\ArticleNote;
-use App\Entity\Comment;
 use App\Entity\User;
+use App\Entity\Article;
+use App\Entity\Comment;
 use App\Form\ArticleType;
-use Symfony\Component\Routing\RouterInterface;
 use App\Form\CommentType;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Entity\ArticleNote;
 use App\Repository\ArticleRepository;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\RouterInterface;
+use Symfony\Component\ExpressionLanguage\Expression;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/articles', name:'articles_')]
 class ArticleController extends AbstractController
 {
     #[Route('/show/{id}', name: 'show')]
+    #[IsGranted('show', 'article')]
     public function show(RouterInterface $router,Article $article = null){
         
         $comment = new Comment;
@@ -49,13 +52,12 @@ class ArticleController extends AbstractController
 
     #[Route('/edit/{id}', name: 'edit')]
     #[Route('/create', name: 'create')]
+    #[IsGranted('edit', 'article')]
     public function edit(Request $request, EntityManagerInterface $em, ?Article $article = null): Response
     {
-        $isCreate = false;
-        if(!$article){
-            $isCreate = true;
-            $article = new Article();
-        }
+        $isCreate = !$article;
+        $article = $article ?? new Article();
+
 
         $form = $this->createForm(ArticleType::class, $article);
         
@@ -67,6 +69,7 @@ class ArticleController extends AbstractController
             // but, the original `$task` variable has also been updated
             $article = $form->getData();
             $article->setStatus('DRAFT');
+            $article->setUser($this->getUser());
             
             $em->persist($article);
             $em->flush();
@@ -79,10 +82,13 @@ class ArticleController extends AbstractController
         
         
         return $this->render('article/edit.html.twig',[
-            'form' => $form
+            'form' => $form,
+            'is_create' => $isCreate,
         ]);
     }
     #[Route('/delete/{id}', name: 'delete')]
+    #[IsGranted('ROLE_ADMIN')]
+    
     public function delete(EntityManagerInterface $em, Article $article): RedirectResponse
     {
         $em->remove($article);

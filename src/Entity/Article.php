@@ -45,6 +45,10 @@ class Article
     #[ORM\ManyToOne(inversedBy: 'Article')]
     private ?ArticleCategorie $categorie = null;
 
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $user;
+
     public function __construct()
     {
         $this->comments = new ArrayCollection();
@@ -188,6 +192,18 @@ class Article
     public function setCategorie(?ArticleCategorie $categorie): static
     {
         $this->categorie = $categorie;
+
+        return $this;
+    }
+
+    public function getUser(): User
+    {
+        return $this->user;
+    }
+
+    public function setUser(User $user=null): static
+    {
+        $this->user = $user;
 
         return $this;
     }
